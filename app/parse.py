@@ -124,6 +124,10 @@ def get_information_from_product_page(url: str) -> [Product]:
     return [parse_single_product(product) for product in products]
 
 
+def sanitize_description(description: str) -> str:
+    return description.replace("\xa0", " ")
+
+
 def write_products_to_csv(path_to_csv_file: str, products: [Product]) -> None:
     with open(path_to_csv_file, "w", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
@@ -136,8 +140,11 @@ def write_products_to_csv(path_to_csv_file: str, products: [Product]) -> None:
         for product in products:
             writer.writerow(
                 [
-                    product.title, product.description, product.price,
-                    product.rating, product.num_of_reviews,
+                    product.title,
+                    sanitize_description(product.description),
+                    product.price,
+                    product.rating,
+                    product.num_of_reviews,
                 ]
             )
 
