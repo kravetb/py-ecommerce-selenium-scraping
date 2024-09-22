@@ -27,6 +27,9 @@ TABLETS_URL = urljoin(HOME_URL, "computers/tablets")
 PHONES_URL = urljoin(HOME_URL, "phones/")
 TOUCH_URL = urljoin(HOME_URL, "phones/touch")
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class Product:
@@ -82,10 +85,6 @@ def click_accept_button(url: str) -> None:
         accept_button.click()
     except Exception as e:
         print(f"Accept cookies button not found: {e}")
-
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 
 def get_information_from_product_page(url: str) -> [Product]:
