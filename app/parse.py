@@ -1,4 +1,5 @@
 import csv
+import logging
 import time
 from dataclasses import dataclass
 
@@ -83,6 +84,10 @@ def click_accept_button(url: str) -> None:
         print(f"Accept cookies button not found: {e}")
 
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+
 def get_information_from_product_page(url: str) -> [Product]:
     driver = get_driver()
     driver.get(url)
@@ -106,16 +111,15 @@ def get_information_from_product_page(url: str) -> [Product]:
                     )
                 )
             else:
-                print("Кнопка 'Load More' більше не доступна.")
+                logger.info("'Load More' button is no longer available.")
                 break
 
         except (TimeoutException, NoSuchElementException):
-            print("Кнопка 'Load More' не знайдена або не доступна.")
+            logger.warning("'Load More' button not found or unavailable.")
             break
         except ElementClickInterceptedException:
-            print(
-                "Не вдалося натиснути на "
-                "кнопку 'Load More'. Спробуємо ще раз."
+            logger.warning(
+                "Failed to click the 'Load More' button. Retrying."
             )
 
     soup = BeautifulSoup(driver.page_source, "html.parser")
@@ -149,22 +153,23 @@ def write_products_to_csv(path_to_csv_file: str, products: [Product]) -> None:
             )
 
 
+urls_and_files = [
+    (HOME_URL, "home.csv"),
+    (COMPUTERS_URL, "computers.csv"),
+    (LAPTOPS_URL, "laptops.csv"),
+    (TABLETS_URL, "tablets.csv"),
+    (PHONES_URL, "phones.csv"),
+    (TOUCH_URL, "touch.csv"),
+]
+
+
 def get_all_products() -> None:
     with webdriver.Chrome() as new_driver:
         set_driver(new_driver)
         click_accept_button(HOME_URL)
-        home_products = get_information_from_product_page(HOME_URL)
-        write_products_to_csv("home.csv", home_products)
-        computers_products = get_information_from_product_page(COMPUTERS_URL)
-        write_products_to_csv("computers.csv", computers_products)
-        laptops_products = get_information_from_product_page(LAPTOPS_URL)
-        write_products_to_csv("laptops.csv", laptops_products)
-        tablets_products = get_information_from_product_page(TABLETS_URL)
-        write_products_to_csv("tablets.csv", tablets_products)
-        phones_products = get_information_from_product_page(PHONES_URL)
-        write_products_to_csv("phones.csv", phones_products)
-        touch_products = get_information_from_product_page(TOUCH_URL)
-        write_products_to_csv("touch.csv", touch_products)
+        for url, path in urls_and_files:
+            products = get_information_from_product_page(url)
+            write_products_to_csv(path, products)
 
 
 if __name__ == "__main__":
